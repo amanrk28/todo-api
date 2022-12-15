@@ -119,5 +119,6 @@ def get_task_lists():
 #    app.run(debug = True)
 with app.app_context():
    db.create_all()
-   app.run(debug=True)
+   DEBUG = eval((os.getenv('DEBUG')).title())
+   app.run(debug=DEBUG)
 
