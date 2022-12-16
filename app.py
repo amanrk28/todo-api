@@ -1,18 +1,18 @@
-from flask import Flask , jsonify , request
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
-
 load_dotenv()
 
 app = Flask(__name__)
+app.config['DEBUG'] = (os.getenv('DEBUG', "False") == 'True')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URL')
-app.config['SECRET_KEY'] = "random string"
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 db = SQLAlchemy(app)
 CORS(app)
-
+db.init_app(app)
 
 class Tasklists(db.Model):
    __tablename__ = "tasklist"
@@ -39,8 +39,6 @@ class Tasks(db.Model):
       self.list_id = list_id
       self.Completed = False
 
-
-
 #to get the value of  tasklist
 @app.route('/tasklists')
 def get_taskList():
@@ -53,7 +51,6 @@ def get_taskList():
          task_lists_list.append(t)
       return jsonify(tasklist=task_lists_list)
 
-
 # post thet tasklist
 @app.route('/tasklists' ,  methods = ['POST'])
 def create_task_lists():
@@ -63,7 +60,6 @@ def create_task_lists():
    db.session.add(ts)
    db.session.commit()
    return jsonify(message = " task list is created") ,201
-
 
 # get the task
 @app.route('/tasks')
@@ -100,7 +96,6 @@ def update_task(id):
    db.session.commit()
    return jsonify(message="task updated" , task_id=task.id, task_Completed=task.Completed)
 
-
 # delete  the task
 @app.route("/tasks/<id>" , methods = ['DELETE'])
 def delete(id):
@@ -113,12 +108,6 @@ def delete(id):
 def get_task_lists():
    return "hello world"
 
-# if __name__ == '__main__':
-#    db.create_all()
-#    app.app_context()
-#    app.run(debug = True)
-with app.app_context():
-   db.create_all()
-   DEBUG = eval((os.getenv('DEBUG')).title())
-   app.run(debug=DEBUG)
+if __name__ == '__main__':
+   app.run()
 
